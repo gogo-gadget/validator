@@ -15,10 +15,35 @@ type Field struct {
 
 type CustomValidationFunc func(ctx context.Context, f Field) error
 
+type CustomValidatorConfig struct {
+	// validation will fail if tag is on field of nil ptr
+	// or even if tag is nested on some nil ptr
+	ShouldFailIfFieldOfNilPtr bool
+}
+
+func NewCustomValidatorConfig() *CustomValidatorConfig{
+	return &CustomValidatorConfig{}
+}
+
+func (cfg *CustomValidatorConfig) WithNilValidation(enabled bool) *CustomValidatorConfig {
+	cfg.ShouldFailIfFieldOfNilPtr = enabled
+	return cfg
+}
+
 type CustomValidator struct {
-	Validate        CustomValidationFunc
+	ID 				string
 	TagRegex        *regexp.Regexp
-	ShouldFailIfNil bool
+	Validate        CustomValidationFunc
+	Config			*CustomValidatorConfig
+}
+
+func NewCustomValidator(id string, tagRegex *regexp.Regexp, validate CustomValidationFunc, cfg *CustomValidatorConfig) CustomValidator {
+	return CustomValidator{
+		ID:       id,
+		TagRegex: tagRegex,
+		Validate: validate,
+		Config:   cfg,
+	}
 }
 
 type Validator struct {
@@ -37,7 +62,6 @@ func (v *Validator) Validate(ctx context.Context, i interface{}) error{
 	// if the kind of the provided interface is interface or pointer use its underlying element instead
 	if kind == reflect.Interface || kind == reflect.Ptr{
 		if iValue.IsNil() {
-			// TODO fail validators that should fail on a nil ptr
 			// fail validators that should fail on a nil ptr
 			iType = iType.Elem()
 			kind = iType.Kind()
@@ -47,7 +71,7 @@ func (v *Validator) Validate(ctx context.Context, i interface{}) error{
 				return nil
 			}
 
-			err := v.failStructNilValidations(iType)
+			err := v.validateStructNilValidations(iType)
 			if err != nil {
 				return err
 			}
@@ -77,7 +101,7 @@ func (v *Validator) RegisterValidationFunc(cv CustomValidator){
 		v.CustomValidators = map[string]CustomValidator{}
 	}
 
-	v.CustomValidators[cv.TagRegex.String()] = cv
+	v.CustomValidators[cv.ID] = cv
 }
 
 
@@ -135,7 +159,7 @@ func (v *Validator) validateField(ctx context.Context, field Field) error {
 				return nil
 			}
 
-			err := v.failStructNilValidations(fType)
+			err := v.validateStructNilValidations(fType)
 			if err != nil {
 				return err
 			}
@@ -162,11 +186,11 @@ func (v *Validator) validateField(ctx context.Context, field Field) error {
 	return nil
 }
 
-func (v *Validator) failStructNilValidations(structType reflect.Type) error {
+func (v *Validator) validateStructNilValidations(structType reflect.Type) error {
 	for i:=0; i < structType.NumField(); i++ {
 		structField := structType.Field(i)
 
-		err := v.failStructFieldNilValidations(structField)
+		err := v.validateFieldNilValidations(structField)
 		if err != nil{
 			return err
 		}
@@ -175,13 +199,13 @@ func (v *Validator) failStructNilValidations(structType reflect.Type) error {
 	return nil
 }
 
-func (v *Validator) failStructFieldNilValidations(structField reflect.StructField) error {
+func (v *Validator) validateFieldNilValidations(structField reflect.StructField) error {
 	validatorTag := structField.Tag.Get("validator")
 	subTags := strings.Split(validatorTag, ";")
 
 	for _, cv := range v.CustomValidators{
 		for _, subTag := range subTags {
-			if cv.TagRegex.MatchString(subTag) && cv.ShouldFailIfNil {
+			if cv.TagRegex.MatchString(subTag) && cv.Config.ShouldFailIfFieldOfNilPtr {
 				return fmt.Errorf("validation failed since validator for regex: %v failed", cv.TagRegex.String())
 			}
 		}
@@ -200,7 +224,7 @@ func (v *Validator) failStructFieldNilValidations(structField reflect.StructFiel
 	}
 
 	// If the field itself is of kind struct validate the nested struct
-	err := v.failStructNilValidations(fType)
+	err := v.validateStructNilValidations(fType)
 	if err != nil {
 		return err
 	}
