@@ -1,0 +1,15 @@
+run:
+  skip-dirs-use-default: true
+  timeout: 1m
+
+linters:
+  enable:
+    - gofmt
+    - golint
+    - gosec
+    - misspell
+    - goconst
+    - dogsled
+    - bodyclose
+    - unconvert
+    - interfacer
