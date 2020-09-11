@@ -1,4 +1,4 @@
-package custom_validator
+package cv
 
 import (
 	"context"
