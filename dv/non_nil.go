@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"regexp"
 
-	cv "github.com/gogo-gadget/validator/pkg/custom-validator"
+	cv "github.com/gogo-gadget/validator/pkg/cv"
 )
 
 func NonNil() *cv.CustomValidator {

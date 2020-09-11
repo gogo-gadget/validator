@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	cv "github.com/gogo-gadget/validator/pkg/custom-validator"
+	cv "github.com/gogo-gadget/validator/pkg/cv"
 )
 
 type Validator struct {
