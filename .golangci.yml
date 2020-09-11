@@ -2,6 +2,9 @@ run:
   skip-dirs-use-default: true
   timeout: 1m
 
+service:
+  golangci-lint-version: 1.29.x
+
 linters:
   enable:
     - gofmt
