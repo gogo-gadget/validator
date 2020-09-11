@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	cv "github.com/gogo-gadget/validator/pkg/custom-validator"
+	cv "github.com/gogo-gadget/validator/pkg/cv"
 )
 
 type simpleStruct struct {

@@ -1,6 +1,6 @@
 package validator
 
-import dv "github.com/gogo-gadget/validator/default-validators"
+import dv "github.com/gogo-gadget/validator/dv"
 
 func (v *Validator) RegisterDefaultCustomValidators() {
 	v.RegisterCustomValidator(dv.NonNil())
