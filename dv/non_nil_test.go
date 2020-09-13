@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	cv "github.com/gogo-gadget/validator/pkg/cv"
+	"github.com/gogo-gadget/validator/pkg/cv"
 )
 
 type simpleStruct struct {
@@ -15,7 +15,7 @@ type simpleStruct struct {
 }
 
 func TestValidateNonNil(t *testing.T) {
-	f := cv.Field{
+	f := &cv.Field{
 		StructField: reflect.StructField{},
 		Value:       reflect.ValueOf(&simpleStruct{}),
 	}
@@ -27,7 +27,7 @@ func TestValidateNonNil(t *testing.T) {
 
 func TestValidateNonNil_failsForNilValue(t *testing.T) {
 	nilValue := reflect.Zero(reflect.TypeOf((*error)(nil)).Elem())
-	f := cv.Field{
+	f := &cv.Field{
 		StructField: reflect.StructField{},
 		Value:       nilValue,
 	}

@@ -91,7 +91,7 @@ import (
 	"regexp"
 
 	"github.com/gogo-gadget/validator"
-    cv "github.com/gogo-gadget/validator/pkg/cv"
+    "github.com/gogo-gadget/validator/pkg/cv"
 )
 
 func main() {
@@ -109,7 +109,7 @@ func NonNil() *cv.CustomValidator {
 	return customValidator
 }
 
-func ValidateNonNil(ctx context.Context, f cv.Field) error {
+func ValidateNonNil(ctx context.Context, f *cv.Field) error {
 	kind := f.Value.Kind()
 
 	switch kind {

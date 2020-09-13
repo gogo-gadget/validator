@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"strings"
 
-	cv "github.com/gogo-gadget/validator/pkg/cv"
+	"github.com/gogo-gadget/validator/pkg/cv"
 )
 
 type Validator struct {
@@ -46,7 +46,7 @@ func (v *Validator) Validate(ctx context.Context, i interface{}) error {
 				return nil
 			}
 
-			err := v.validateStructNilValidations(iType)
+			err := v.validateStructNilValidations(iType, nil)
 			if err != nil {
 				return err
 			}
@@ -63,7 +63,7 @@ func (v *Validator) Validate(ctx context.Context, i interface{}) error {
 		return fmt.Errorf("validation of kind %v is not supported", kind)
 	}
 
-	err := v.validateStruct(ctx, iValue)
+	err := v.validateStruct(ctx, iValue, nil)
 	if err != nil {
 		return err
 	}
@@ -72,13 +72,14 @@ func (v *Validator) Validate(ctx context.Context, i interface{}) error {
 }
 
 // Should only be used on reflect.Values of kind struct
-func (v *Validator) validateStruct(ctx context.Context, structValue reflect.Value) error {
+func (v *Validator) validateStruct(ctx context.Context, structValue reflect.Value, parent *cv.Field) error {
 	structType := structValue.Type()
 	for i := 0; i < structType.NumField(); i++ {
 		structField := structType.Field(i)
 		fieldValue := structValue.Field(i)
 
-		field := cv.Field{
+		field := &cv.Field{
+			Parent:      parent,
 			StructField: structField,
 			Value:       fieldValue,
 		}
@@ -92,7 +93,7 @@ func (v *Validator) validateStruct(ctx context.Context, structValue reflect.Valu
 	return nil
 }
 
-func (v *Validator) validateField(ctx context.Context, field cv.Field) error {
+func (v *Validator) validateField(ctx context.Context, field *cv.Field) error {
 	// Validate Field if it contains a subTag matching a regex of any custom validator
 	validatorTag := field.StructField.Tag.Get("validator")
 	subTags := strings.Split(validatorTag, ";")
@@ -124,7 +125,7 @@ func (v *Validator) validateField(ctx context.Context, field cv.Field) error {
 				return nil
 			}
 
-			err := v.validateStructNilValidations(fType)
+			err := v.validateStructNilValidations(fType, field)
 			if err != nil {
 				return err
 			}
@@ -143,7 +144,7 @@ func (v *Validator) validateField(ctx context.Context, field cv.Field) error {
 	}
 
 	// If the field itself is of kind struct validate the nested struct
-	err := v.validateStruct(ctx, fValue)
+	err := v.validateStruct(ctx, fValue, field)
 	if err != nil {
 		return err
 	}
@@ -151,11 +152,16 @@ func (v *Validator) validateField(ctx context.Context, field cv.Field) error {
 	return nil
 }
 
-func (v *Validator) validateStructNilValidations(structType reflect.Type) error {
+func (v *Validator) validateStructNilValidations(structType reflect.Type, parent *cv.Field) error {
 	for i := 0; i < structType.NumField(); i++ {
 		structField := structType.Field(i)
 
-		err := v.validateFieldNilValidations(structField)
+		field := &cv.Field{
+			Parent:      parent,
+			StructField: structField,
+		}
+
+		err := v.validateFieldNilValidations(field)
 		if err != nil {
 			return err
 		}
@@ -164,14 +170,16 @@ func (v *Validator) validateStructNilValidations(structType reflect.Type) error 
 	return nil
 }
 
-func (v *Validator) validateFieldNilValidations(structField reflect.StructField) error {
+func (v *Validator) validateFieldNilValidations(field *cv.Field) error {
+	structField := field.StructField
 	validatorTag := structField.Tag.Get("validator")
 	subTags := strings.Split(validatorTag, ";")
 
 	for _, customValidator := range v.CustomValidators {
 		for _, subTag := range subTags {
 			if customValidator.TagRegex.MatchString(subTag) && customValidator.Config.ShouldFailIfFieldOfNilPtr {
-				return fmt.Errorf("validation failed since validator for regex: %v failed", customValidator.TagRegex.String())
+				fullFieldName := getFullFieldName(field)
+				return fmt.Errorf("validation failed since validator for regex: %v failed on nil value for field: %v", customValidator.TagRegex.String(), fullFieldName)
 			}
 		}
 	}
@@ -189,10 +197,25 @@ func (v *Validator) validateFieldNilValidations(structField reflect.StructField)
 	}
 
 	// If the field itself is of kind struct validate the nested struct
-	err := v.validateStructNilValidations(fType)
+	err := v.validateStructNilValidations(fType, field)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func getFullFieldName(field *cv.Field) string {
+	if field == nil {
+		return ""
+	}
+
+	fullFieldName := field.StructField.Name
+	parent := field.Parent
+	for parent != nil {
+		fullFieldName = fmt.Sprintf("%v.%v", parent.StructField.Name, fullFieldName)
+		parent = parent.Parent
+	}
+
+	return fullFieldName
 }

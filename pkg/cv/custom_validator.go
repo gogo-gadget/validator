@@ -7,11 +7,12 @@ import (
 )
 
 type Field struct {
+	Parent      *Field
 	StructField reflect.StructField
 	Value       reflect.Value
 }
 
-type CustomValidationFunc func(ctx context.Context, f Field) error
+type CustomValidationFunc func(ctx context.Context, f *Field) error
 
 type CustomValidatorConfig struct {
 	// validation will fail if tag is on field of nil ptr

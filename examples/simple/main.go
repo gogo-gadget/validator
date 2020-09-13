@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/gogo-gadget/validator"
 )
@@ -18,12 +19,17 @@ type nestedStruct struct {
 }
 
 type doubleNestedStruct struct {
-	doubleNestedField string `validator:"required"`
+	doubleNestedField string `validator:"non-nil"`
 }
 
 func main() {
 	ts := &testStruct{
 		name: "top-level",
+		nested: &nestedStruct{
+			doubleNested: &doubleNestedStruct{
+				doubleNestedField: "I am not nil.",
+			},
+		},
 	}
 
 	v := validator.NewValidator()
@@ -33,7 +39,7 @@ func main() {
 	err := v.Validate(ctx, ts)
 
 	if err != nil {
-		fmt.Println("oh no, validation failed")
+		log.Fatal(err)
 		return
 	}
 
