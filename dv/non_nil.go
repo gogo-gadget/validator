@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"regexp"
 
-	cv "github.com/gogo-gadget/validator/pkg/cv"
+	"github.com/gogo-gadget/validator/pkg/cv"
 )
 
 func NonNil() *cv.CustomValidator {
@@ -17,7 +17,7 @@ func NonNil() *cv.CustomValidator {
 	return customValidator
 }
 
-func ValidateNonNil(ctx context.Context, f cv.Field) error {
+func ValidateNonNil(ctx context.Context, f *cv.Field) error {
 	kind := f.Value.Kind()
 
 	switch kind {
