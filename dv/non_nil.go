@@ -9,6 +9,16 @@ import (
 	"github.com/gogo-gadget/validator/pkg/cv"
 )
 
+type NilError string
+
+func NilErrorf(format string, a ...interface{}) NilError {
+	return NilError(fmt.Sprintf(format, a...))
+}
+
+func (r NilError) Error() string {
+	return string(r)
+}
+
 func NonNil() *cv.CustomValidator {
 	nonNilString := "non-nil"
 	nonNilRegexp := regexp.MustCompile(nonNilString)
@@ -24,7 +34,7 @@ func ValidateNonNil(ctx context.Context, f *cv.Field) error {
 	case reflect.Interface, reflect.Ptr, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func, reflect.UnsafePointer:
 		// the fields value can only be nil if it is an interface, pointer, map, slice, chan, func or unsafe pointer
 		if f.Value.IsNil() {
-			return fmt.Errorf("NonNil field %v is nil", f.StructField.Name)
+			return NilErrorf("NonNil field %v is nil", f.StructField.Name)
 		}
 	}
 
