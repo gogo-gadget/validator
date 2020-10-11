@@ -8,10 +8,10 @@ import (
 )
 
 func Required() *cv.CustomValidator {
-	requiredString := "required"
-	requiredRegexp := regexp.MustCompile(requiredString)
+	requiredTagString := "required"
+	requiredTagRegexp := regexp.MustCompile(requiredTagString)
 
-	customValidator := cv.NewCustomValidator("required", requiredRegexp, ValidateRequired, cv.NewCustomValidatorConfig().WithNilValidation(true))
+	customValidator := cv.NewCustomValidator("required", requiredTagRegexp, ValidateRequired, cv.NewCustomValidatorConfig().WithNilValidation(true))
 	return customValidator
 }
 

@@ -20,10 +20,10 @@ func (r NilError) Error() string {
 }
 
 func NonNil() *cv.CustomValidator {
-	nonNilString := "non-nil"
-	nonNilRegexp := regexp.MustCompile(nonNilString)
+	nonNilTagString := "non-nil"
+	nonNilTagRegexp := regexp.MustCompile(nonNilTagString)
 
-	customValidator := cv.NewCustomValidator("non-nil", nonNilRegexp, ValidateNonNil, cv.NewCustomValidatorConfig().WithNilValidation(true))
+	customValidator := cv.NewCustomValidator("non-nil", nonNilTagRegexp, ValidateNonNil, cv.NewCustomValidatorConfig().WithNilValidation(true))
 	return customValidator
 }
 

@@ -19,10 +19,10 @@ func (r ZeroError) Error() string {
 }
 
 func NonZero() *cv.CustomValidator {
-	nonZeroString := "non-zero"
-	nonZeroRegexp := regexp.MustCompile(nonZeroString)
+	nonZeroTagString := "non-zero"
+	nonZeroTagRegexp := regexp.MustCompile(nonZeroTagString)
 
-	customValidator := cv.NewCustomValidator("non-zero", nonZeroRegexp, ValidateNonZero, cv.NewCustomValidatorConfig())
+	customValidator := cv.NewCustomValidator("non-zero", nonZeroTagRegexp, ValidateNonZero, cv.NewCustomValidatorConfig())
 	return customValidator
 }
 
