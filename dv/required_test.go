@@ -14,7 +14,7 @@ func TestRequired(t *testing.T) {
 	f := &cv.Field{
 		Value: reflect.ValueOf("required value"),
 	}
-	err := ValidateRequired(context.Background(), f)
+	err := ValidateRequired(context.Background(), f, &cv.ValidationContext{})
 
 	assert.NoError(t, err)
 }
@@ -26,7 +26,7 @@ func TestRequired_failsForNilValue(t *testing.T) {
 		Value: nilValue,
 	}
 
-	err := ValidateRequired(context.Background(), f)
+	err := ValidateRequired(context.Background(), f, &cv.ValidationContext{})
 
 	assert.Error(t, err)
 }
@@ -36,7 +36,7 @@ func TestRequired_failsForZeroValue(t *testing.T) {
 		Value: reflect.ValueOf(""),
 	}
 
-	err := ValidateRequired(context.Background(), f)
+	err := ValidateRequired(context.Background(), f, &cv.ValidationContext{})
 
 	assert.Error(t, err)
 }

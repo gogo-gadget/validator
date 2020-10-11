@@ -23,19 +23,21 @@ func NonNil() *cv.CustomValidator {
 	nonNilTagString := "non-nil"
 	nonNilTagRegexp := regexp.MustCompile(nonNilTagString)
 
-	customValidator := cv.NewCustomValidator("non-nil", nonNilTagRegexp, ValidateNonNil, cv.NewCustomValidatorConfig().WithNilValidation(true))
+	customValidator := cv.NewCustomValidator("non-nil", nonNilTagRegexp, ValidateNonNil, cv.NewCustomValidatorConfig().FailForNilValue())
 	return customValidator
 }
 
-func ValidateNonNil(ctx context.Context, f *cv.Field) error {
-	kind := f.Value.Kind()
+func ValidateNonNil(ctx context.Context, f *cv.Field, vCtx *cv.ValidationContext) error {
+	value := f.Value
+	kind := value.Kind()
 
-	switch kind {
-	case reflect.Interface, reflect.Ptr, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func, reflect.UnsafePointer:
-		// the fields value can only be nil if it is an interface, pointer, map, slice, chan, func or unsafe pointer
+	for kind == reflect.Interface || kind == reflect.Ptr || kind == reflect.UnsafePointer {
 		if f.Value.IsNil() {
-			return NilErrorf("NonNil field %v is nil", f.StructField.Name)
+			return NilErrorf("non-nil field %v is nil", f.StructField.Name)
 		}
+
+		value = value.Elem()
+		kind = value.Kind()
 	}
 
 	return nil

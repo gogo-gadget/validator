@@ -15,7 +15,7 @@ func TestValidateNonZero(t *testing.T) {
 		Value: reflect.ValueOf("non-zero"),
 	}
 
-	err := ValidateNonZero(context.Background(), f)
+	err := ValidateNonZero(context.Background(), f, &cv.ValidationContext{})
 
 	assert.NoError(t, err)
 }
@@ -25,7 +25,7 @@ func TestValidateNonZero_failsForZeroValue(t *testing.T) {
 		Value: reflect.ValueOf(""),
 	}
 
-	err := ValidateNonZero(context.Background(), f)
+	err := ValidateNonZero(context.Background(), f, &cv.ValidationContext{})
 
 	assert.Error(t, err)
 }

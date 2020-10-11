@@ -32,13 +32,13 @@ func (v *Validator) RegisterCustomValidator(customValidator *cv.CustomValidator)
 func (v *Validator) Validate(ctx context.Context, i interface{}) error {
 	iValue := reflect.ValueOf(i)
 	iType := iValue.Type()
-	kind := iType.Kind()
+	kind := iValue.Kind()
 
 	// if the kind of the provided interface is interface or pointer use its underlying element instead
-	if kind == reflect.Interface || kind == reflect.Ptr {
+	for kind == reflect.Interface || kind == reflect.Ptr || kind == reflect.UnsafePointer {
 		if iValue.IsNil() {
 			// fail validators that should fail on a nil ptr
-			iType = iType.Elem()
+			iType = getUnderlyingType(iType)
 			kind = iType.Kind()
 
 			if kind != reflect.Struct {
@@ -56,7 +56,7 @@ func (v *Validator) Validate(ctx context.Context, i interface{}) error {
 
 		iValue = iValue.Elem()
 		iType = iValue.Type()
-		kind = iType.Kind()
+		kind = iValue.Kind()
 	}
 
 	if kind != reflect.Struct {
@@ -101,7 +101,11 @@ func (v *Validator) validateField(ctx context.Context, field *cv.Field) error {
 	for _, customValidator := range v.CustomValidators {
 		for _, subTag := range subTags {
 			if customValidator.TagRegex.MatchString(subTag) {
-				err := customValidator.Validate(ctx, field)
+				validationCtx := &cv.ValidationContext{
+					Tag:    validatorTag,
+					SubTag: subTag,
+				}
+				err := customValidator.Validate(ctx, field, validationCtx)
 				if err != nil {
 					return err
 				}
@@ -114,10 +118,10 @@ func (v *Validator) validateField(ctx context.Context, field *cv.Field) error {
 	kind := fType.Kind()
 
 	// if the kind of the field is interface or pointer use its underlying element instead
-	if kind == reflect.Interface || kind == reflect.Ptr {
+	for kind == reflect.Interface || kind == reflect.Ptr || kind == reflect.UnsafePointer {
 		if fValue.IsNil() {
 			// fail validators that should fail on a nil ptr
-			fType = fType.Elem()
+			fType = getUnderlyingType(fType)
 			kind = fType.Kind()
 
 			if kind != reflect.Struct {
@@ -184,12 +188,8 @@ func (v *Validator) validateFieldNilValidations(field *cv.Field) error {
 		}
 	}
 
-	fType := structField.Type
+	fType := getUnderlyingType(structField.Type)
 	kind := fType.Kind()
-	if kind == reflect.Interface || kind == reflect.Ptr {
-		fType = fType.Elem()
-		kind = fType.Kind()
-	}
 
 	// If the field is not of kind struct there is nothing to be validated anymore
 	if kind != reflect.Struct {
@@ -218,4 +218,15 @@ func getFullFieldName(field *cv.Field) string {
 	}
 
 	return fullFieldName
+}
+
+func getUnderlyingType(rType reflect.Type) reflect.Type {
+	kind := rType.Kind()
+
+	for kind == reflect.Interface || kind == reflect.Ptr || kind == reflect.UnsafePointer {
+		rType = rType.Elem()
+		kind = rType.Kind()
+	}
+
+	return rType
 }

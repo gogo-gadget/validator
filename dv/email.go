@@ -27,28 +27,28 @@ func Email() *cv.CustomValidator {
 	emailTagString := "email"
 	emailTagRegex := regexp.MustCompile(emailTagString)
 
-	customValidator := cv.NewCustomValidator("email", emailTagRegex, ValidateEmail, cv.NewCustomValidatorConfig().WithNilValidation(true))
+	customValidator := cv.NewCustomValidator("email", emailTagRegex, ValidateEmail, cv.NewCustomValidatorConfig().FailForNilValue())
 	return customValidator
 }
 
-func ValidateEmail(ctx context.Context, f *cv.Field) error {
+func ValidateEmail(ctx context.Context, f *cv.Field, vCtx *cv.ValidationContext) error {
 	value := f.Value
 	kind := value.Kind()
 
-	switch kind {
-	case reflect.Ptr, reflect.UnsafePointer:
-		// if the field is a pointer validate its underlying element
+	for kind == reflect.Interface || kind == reflect.Ptr || kind == reflect.UnsafePointer {
 		if f.Value.IsNil() {
 			return EmailErrorf("email field %v is nil", f.StructField.Name)
 		}
-		value = f.Value.Elem()
+
+		value = value.Elem()
+		kind = value.Kind()
 	}
 
-	if value.Kind() != reflect.String{
+	if kind != reflect.String {
 		return EmailErrorf("email field %v cannot be converted to string", f.StructField.Name)
 	}
 
-	if f.Value.IsZero() {
+	if value.IsZero() {
 		return EmailErrorf("email field %v has zero value", f.StructField.Name)
 	}
 
@@ -56,7 +56,7 @@ func ValidateEmail(ctx context.Context, f *cv.Field) error {
 	email := value.String()
 
 	isEmail := emailRegex.MatchString(email)
-	if !isEmail{
+	if !isEmail {
 		return EmailErrorf("email field %v is no valid email", f.StructField.Name)
 	}
 
