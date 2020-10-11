@@ -6,13 +6,18 @@ import (
 	"regexp"
 )
 
+type ValidationContext struct {
+	Tag    string
+	SubTag string
+}
+
 type Field struct {
 	Parent      *Field
 	StructField reflect.StructField
 	Value       reflect.Value
 }
 
-type CustomValidationFunc func(ctx context.Context, f *Field) error
+type CustomValidationFunc func(ctx context.Context, f *Field, validationCtx *ValidationContext) error
 
 type CustomValidatorConfig struct {
 	// validation will fail if tag is on field of nil ptr
@@ -24,8 +29,8 @@ func NewCustomValidatorConfig() *CustomValidatorConfig {
 	return &CustomValidatorConfig{}
 }
 
-func (cfg *CustomValidatorConfig) WithNilValidation(enabled bool) *CustomValidatorConfig {
-	cfg.ShouldFailIfFieldOfNilPtr = enabled
+func (cfg *CustomValidatorConfig) FailForNilValue() *CustomValidatorConfig {
+	cfg.ShouldFailIfFieldOfNilPtr = true
 	return cfg
 }
 

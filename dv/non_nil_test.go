@@ -19,7 +19,7 @@ func TestValidateNonNil(t *testing.T) {
 		Value: reflect.ValueOf(&simpleNonNilStruct{}),
 	}
 
-	err := ValidateNonNil(context.Background(), f)
+	err := ValidateNonNil(context.Background(), f, &cv.ValidationContext{})
 
 	assert.NoError(t, err)
 }
@@ -30,7 +30,7 @@ func TestValidateNonNil_failsForNilValue(t *testing.T) {
 		Value: nilValue,
 	}
 
-	err := ValidateNonNil(context.Background(), f)
+	err := ValidateNonNil(context.Background(), f, &cv.ValidationContext{})
 
 	assert.Error(t, err)
 }

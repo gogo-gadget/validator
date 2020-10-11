@@ -3,6 +3,7 @@ package dv
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"regexp"
 
 	"github.com/gogo-gadget/validator/pkg/cv"
@@ -19,14 +20,26 @@ func (r ZeroError) Error() string {
 }
 
 func NonZero() *cv.CustomValidator {
-	nonZeroString := "non-zero"
-	nonZeroRegexp := regexp.MustCompile(nonZeroString)
+	nonZeroTagString := "non-zero"
+	nonZeroTagRegexp := regexp.MustCompile(nonZeroTagString)
 
-	customValidator := cv.NewCustomValidator("non-zero", nonZeroRegexp, ValidateNonZero, cv.NewCustomValidatorConfig())
+	customValidator := cv.NewCustomValidator("non-zero", nonZeroTagRegexp, ValidateNonZero, cv.NewCustomValidatorConfig())
 	return customValidator
 }
 
-func ValidateNonZero(ctx context.Context, f *cv.Field) error {
+func ValidateNonZero(ctx context.Context, f *cv.Field, vCtx *cv.ValidationContext) error {
+	value := f.Value
+	kind := value.Kind()
+
+	for kind == reflect.Interface || kind == reflect.Ptr || kind == reflect.UnsafePointer {
+		if f.Value.IsNil() {
+			return ZeroErrorf("non-zero field %v is nil", f.StructField.Name)
+		}
+
+		value = value.Elem()
+		kind = value.Kind()
+	}
+
 	if f.Value.IsZero() {
 		return ZeroErrorf("non-zero field %v has zero value", f.StructField.Name)
 	}

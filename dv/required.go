@@ -8,19 +8,19 @@ import (
 )
 
 func Required() *cv.CustomValidator {
-	requiredString := "required"
-	requiredRegexp := regexp.MustCompile(requiredString)
+	requiredTagString := "required"
+	requiredTagRegexp := regexp.MustCompile(requiredTagString)
 
-	customValidator := cv.NewCustomValidator("required", requiredRegexp, ValidateRequired, cv.NewCustomValidatorConfig().WithNilValidation(true))
+	customValidator := cv.NewCustomValidator("required", requiredTagRegexp, ValidateRequired, cv.NewCustomValidatorConfig().FailForNilValue())
 	return customValidator
 }
 
-func ValidateRequired(ctx context.Context, f *cv.Field) error {
-	err := ValidateNonNil(ctx, f)
+func ValidateRequired(ctx context.Context, f *cv.Field, vCtx *cv.ValidationContext) error {
+	err := ValidateNonNil(ctx, f, vCtx)
 	if err != nil {
 		return err
 	}
-	err = ValidateNonZero(ctx, f)
+	err = ValidateNonZero(ctx, f, vCtx)
 	if err != nil {
 		return err
 	}
