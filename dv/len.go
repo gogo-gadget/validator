@@ -10,21 +10,21 @@ import (
 	"github.com/gogo-gadget/validator/pkg/cv"
 )
 
-// Custom Len Error that will be returned by the Len Custom Validator
+// LenError is a custom error that will be returned by the len custom validator
 type LenError string
 
-// Creates a new Len Error by providing a format string and optional parameters
+// LenErrorf creates a new len error by providing a format string and optional parameters
 func LenErrorf(format string, a ...interface{}) LenError {
 	return LenError(fmt.Sprintf(format, a...))
 }
 
-// Returns the error string
+// Error returns the error message string
 // Implements error interface
 func (err LenError) Error() string {
 	return string(err)
 }
 
-// Creates a new len custom validator
+// Len creates a new len custom validator
 func Len() *cv.CustomValidator {
 	lenTagString := `len\([1-9][0-9]*\)`
 	lenTagRegex := regexp.MustCompile(lenTagString)
@@ -33,7 +33,7 @@ func Len() *cv.CustomValidator {
 	return customValidator
 }
 
-// Custom validation function for the len custom validator
+// ValidateLen is a custom validation function for the len custom validator
 func ValidateLen(ctx context.Context, f *cv.Field, vCtx *cv.ValidationContext) error {
 	value := f.Value
 	kind := value.Kind()

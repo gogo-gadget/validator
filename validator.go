@@ -10,13 +10,13 @@ import (
 	"github.com/gogo-gadget/validator/pkg/cv"
 )
 
-// Custom Tag Syntax Error that will be returned by the validation if the syntax for the validator tag is not correct
+// TagSyntaxError is a custom error that will be returned by the validation if the syntax for the validator tag is not correct
 type TagSyntaxError struct {
 	error  string
 	Fields map[string]interface{}
 }
 
-// Creates a new Tag Syntax Error by providing a format string and optional parameters
+// SyntaxErrorf creates a new tag syntax error by providing a format string and optional parameters
 func SyntaxErrorf(format string, a ...interface{}) *TagSyntaxError {
 	return &TagSyntaxError{
 		error:  fmt.Sprintf(format, a...),
@@ -24,7 +24,7 @@ func SyntaxErrorf(format string, a ...interface{}) *TagSyntaxError {
 	}
 }
 
-// Returns the error string
+// Error returns the error's message string
 // Implements error interface
 func (err *TagSyntaxError) Error() string {
 	if len(err.Fields) > 0 {
@@ -34,14 +34,14 @@ func (err *TagSyntaxError) Error() string {
 	return err.error
 }
 
-// Adds custom information of the form "key: value" to a Syntax Error
+// WithField adds custom information of the form "key: value" to a tag syntax error
 func (err *TagSyntaxError) WithField(key string, value interface{}) *TagSyntaxError {
 	err.Fields[key] = value
 
 	return err
 }
 
-// Adds multiple information to a Syntax Error each of the form "key: value"
+// WithFields adds multiple information to a tag syntax error each of the form "key: value"
 func (err *TagSyntaxError) WithFields(data map[string]interface{}) *TagSyntaxError {
 	for key, val := range data {
 		err.Fields[key] = val
@@ -50,14 +50,14 @@ func (err *TagSyntaxError) WithFields(data map[string]interface{}) *TagSyntaxErr
 	return err
 }
 
-// A Validator can be used to validate instances of structs or pointers to structs.
+// Validator can be used to validate instances of structs or pointers to structs.
 // Uses StructFieldTags of form `validator:"..."` to identify validation rules on the field.
 // Contains a map of Custom Validators that will be used for the validation.
 type Validator struct {
 	CustomValidators map[string]*cv.CustomValidator
 }
 
-// Creates a new instance of a validator and registers all provided default custom validators for it.
+// NewValidator creates a new instance of a validator and registers all provided default custom validators for it.
 // Usage:
 // 		validator := NewValidator()
 //		err := validator.Validate(...)
@@ -69,7 +69,7 @@ func NewValidator() *Validator {
 	return v
 }
 
-// Registers a custom validator for the validator.
+// RegisterCustomValidator registers a custom validator for the validator.
 func (v *Validator) RegisterCustomValidator(customValidator *cv.CustomValidator) {
 	if v.CustomValidators == nil {
 		v.CustomValidators = map[string]*cv.CustomValidator{}
@@ -78,7 +78,7 @@ func (v *Validator) RegisterCustomValidator(customValidator *cv.CustomValidator)
 	v.CustomValidators[customValidator.ID] = customValidator
 }
 
-// Validates the provided interface{} and forwards the provided context to all custom validators.
+// Validate validates the provided interface{} and forwards the provided context to all custom validators.
 // Returns an error if the validation failed or nil otherwise.
 func (v *Validator) Validate(ctx context.Context, i interface{}) error {
 	iValue := reflect.ValueOf(i)
@@ -122,7 +122,7 @@ func (v *Validator) Validate(ctx context.Context, i interface{}) error {
 	return nil
 }
 
-// Should only be used on reflect.Values of kind struct
+// validateStruct should only be used on reflect.Values of kind struct
 func (v *Validator) validateStruct(ctx context.Context, structValue reflect.Value, parent *cv.Field) error {
 	structType := structValue.Type()
 	for i := 0; i < structType.NumField(); i++ {
@@ -144,7 +144,7 @@ func (v *Validator) validateStruct(ctx context.Context, structValue reflect.Valu
 	return nil
 }
 
-// Is run on every field and sub field of a struct
+// validateField is run on every field and sub field of a struct
 func (v *Validator) validateField(ctx context.Context, field *cv.Field) error {
 	// Validate Field if it contains a subTag matching a regex of any custom validator
 	validatorTag := field.StructField.Tag.Get("validator")

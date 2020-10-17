@@ -6,14 +6,14 @@ import (
 	"regexp"
 )
 
-// Contains information about the current validation.
+// ValidationContext contains information about the current validation.
 // Will be forwarded to Custom Validators.
 // Contains the current SubTag that is validated.
 type ValidationContext struct {
 	SubTag string
 }
 
-// Contains information about the field that is validated.
+// Field contains information about the field that is validated.
 type Field struct {
 	// Parent is either the parent field or nil if the field has no parent.
 	Parent      *Field
@@ -21,28 +21,28 @@ type Field struct {
 	Value       reflect.Value
 }
 
-// The type of validation function that needs to be provided in Custom Validator to be run on StructFields
+// CustomValidationFunc is the type of validation function that needs to be provided in custom validator to be run on struct fields
 type CustomValidationFunc func(ctx context.Context, f *Field, validationCtx *ValidationContext) error
 
-// A configuration of a Custom Validator
+// CustomValidatorConfig is used to configure a custom validator
 type CustomValidatorConfig struct {
 	// Validation will fail if tag is on field of nil ptr
 	// or even if tag is nested on some nil ptr
 	ShouldFailIfFieldOfNilPtr bool
 }
 
-// Creates a new Custom Validator Configuration
+// NewCustomValidatorConfig creates a new custom validator configuration
 func NewCustomValidatorConfig() *CustomValidatorConfig {
 	return &CustomValidatorConfig{}
 }
 
-// Configures the Custom Validator Configuration to fail if the field is located on a nil pointer
+// FailForNilValue configures the custom validator configuration to fail if the field is located on a nil pointer
 func (cfg *CustomValidatorConfig) FailForNilValue() *CustomValidatorConfig {
 	cfg.ShouldFailIfFieldOfNilPtr = true
 	return cfg
 }
 
-// A Custom Validator used to run validations on StructFieldTags
+// CustomValidator is used to run validations on struct field tags
 type CustomValidator struct {
 	// ID of the Custom Validator
 	// This should be unique otherwise the last registered Custom Validator will replace the previous with the same ID
@@ -55,7 +55,7 @@ type CustomValidator struct {
 	Config *CustomValidatorConfig
 }
 
-// Creates a new Custom Validator
+// NewCustomValidator creates a new Custom Validator
 func NewCustomValidator(id string, tagRegex *regexp.Regexp, validate CustomValidationFunc, cfg *CustomValidatorConfig) *CustomValidator {
 	cv := CustomValidator{
 		ID:       id,

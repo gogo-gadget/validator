@@ -9,21 +9,21 @@ import (
 	"github.com/gogo-gadget/validator/pkg/cv"
 )
 
-// Custom Zero Error that will be returned by the Non-Zero Custom Validator
+// ZeroError is a custom error that will be returned by the non-zero custom validator
 type ZeroError string
 
-// Creates a new Len Error by providing a format string and optional parameters
+// ZeroErrorf creates a new zero error by providing a format string and optional parameters
 func ZeroErrorf(format string, a ...interface{}) ZeroError {
 	return ZeroError(fmt.Sprintf(format, a...))
 }
 
-// Returns the error string
+// Error returns the error message string
 // Implements error interface
 func (err ZeroError) Error() string {
 	return string(err)
 }
 
-// Creates a new non-zero custom validator
+// NonZero creates a new non-zero custom validator
 func NonZero() *cv.CustomValidator {
 	nonZeroTagString := "non-zero"
 	nonZeroTagRegexp := regexp.MustCompile(nonZeroTagString)
@@ -32,7 +32,7 @@ func NonZero() *cv.CustomValidator {
 	return customValidator
 }
 
-// Custom validation function for the non-zero custom validator
+// ValidateNonZero is a custom validation function for the non-zero custom validator
 func ValidateNonZero(ctx context.Context, f *cv.Field, vCtx *cv.ValidationContext) error {
 	value := f.Value
 	kind := value.Kind()

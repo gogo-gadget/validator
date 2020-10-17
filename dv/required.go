@@ -7,7 +7,7 @@ import (
 	"github.com/gogo-gadget/validator/pkg/cv"
 )
 
-// Creates a new required custom validator
+// Required creates a new required custom validator
 func Required() *cv.CustomValidator {
 	requiredTagString := "required"
 	requiredTagRegexp := regexp.MustCompile(requiredTagString)
@@ -16,7 +16,7 @@ func Required() *cv.CustomValidator {
 	return customValidator
 }
 
-// Custom validation function for the required custom validator
+// ValidateRequired is a custom validation function for the required custom validator
 func ValidateRequired(ctx context.Context, f *cv.Field, vCtx *cv.ValidationContext) error {
 	err := ValidateNonNil(ctx, f, vCtx)
 	if err != nil {

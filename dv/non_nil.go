@@ -9,21 +9,21 @@ import (
 	"github.com/gogo-gadget/validator/pkg/cv"
 )
 
-// Custom Nil Error that will be returned by the Non-Nil Custom Validator
+// NilError is a custom error that will be returned by the non-nil custom validator
 type NilError string
 
-// Creates a new Nil Error by providing a format string and optional parameters
+// NilErrorf creates a new nil error by providing a format string and optional parameters
 func NilErrorf(format string, a ...interface{}) NilError {
 	return NilError(fmt.Sprintf(format, a...))
 }
 
-// Returns the error string
+// Error returns the error message string
 // Implements error interface
 func (err NilError) Error() string {
 	return string(err)
 }
 
-// Creates a new non-nil custom validator
+// NonNil creates a new non-nil custom validator
 func NonNil() *cv.CustomValidator {
 	nonNilTagString := "non-nil"
 	nonNilTagRegexp := regexp.MustCompile(nonNilTagString)
@@ -32,7 +32,7 @@ func NonNil() *cv.CustomValidator {
 	return customValidator
 }
 
-// Custom validation function for the non-nil custom validator
+// ValidateNonNil is a custom validation function for the non-nil custom validator
 func ValidateNonNil(ctx context.Context, f *cv.Field, vCtx *cv.ValidationContext) error {
 	value := f.Value
 	kind := value.Kind()
