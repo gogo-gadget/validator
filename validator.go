@@ -9,10 +9,17 @@ import (
 	"github.com/gogo-gadget/validator/pkg/cv"
 )
 
+// A Validator can be used to validate instances of structs or pointers to structs.
+// Uses StructFieldTags of form `validator:"..."` to identify validation rules on the field.
+// Contains a map of Custom Validators that will be used for the validation.
 type Validator struct {
 	CustomValidators map[string]*cv.CustomValidator
 }
 
+// Creates a new instance of a validator and registers all provided default custom validators for it.
+// Usage:
+// 		validator := NewValidator()
+//		err := validator.Validate(...)
 func NewValidator() *Validator {
 	v := &Validator{}
 
@@ -21,6 +28,7 @@ func NewValidator() *Validator {
 	return v
 }
 
+// Registers a custom validator for the validator.
 func (v *Validator) RegisterCustomValidator(customValidator *cv.CustomValidator) {
 	if v.CustomValidators == nil {
 		v.CustomValidators = map[string]*cv.CustomValidator{}
@@ -29,6 +37,8 @@ func (v *Validator) RegisterCustomValidator(customValidator *cv.CustomValidator)
 	v.CustomValidators[customValidator.ID] = customValidator
 }
 
+// Validates the provided interface{} and forwards the provided context to all custom validators.
+// Returns an error if the validation failed or nil otherwise.
 func (v *Validator) Validate(ctx context.Context, i interface{}) error {
 	iValue := reflect.ValueOf(i)
 	iType := iValue.Type()
@@ -93,6 +103,7 @@ func (v *Validator) validateStruct(ctx context.Context, structValue reflect.Valu
 	return nil
 }
 
+// Is run on every field and sub field of a struct
 func (v *Validator) validateField(ctx context.Context, field *cv.Field) error {
 	// Validate Field if it contains a subTag matching a regex of any custom validator
 	validatorTag := field.StructField.Tag.Get("validator")
