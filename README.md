@@ -1,5 +1,9 @@
 # Gogo-Gadget Validator
 
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/gogo-gadget/validator)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gogo-gadget/validator)](https://goreportcard.com/report/github.com/gogo-gadget/validator)
+[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/gogo-gadget/validator)
+
 Gogo-Gadget Validator is a simple struct validator based on field tags with the following features:
 
 - Struct validation by setting validator tags on fields

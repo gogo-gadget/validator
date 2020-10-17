@@ -2,7 +2,7 @@ package validator
 
 import "github.com/gogo-gadget/validator/dv"
 
-// Registers the default custom validators on the validator instance
+// RegisterDefaultCustomValidators registers the default custom validators on the validator instance.
 func (v *Validator) RegisterDefaultCustomValidators() {
 	v.RegisterCustomValidator(dv.NonNil())
 	v.RegisterCustomValidator(dv.NonZero())

@@ -3,7 +3,7 @@ run:
   timeout: 1m
 
 service:
-  golangci-lint-version: 1.29.x
+  golangci-lint-version: 1.31.x
 
 linters:
   enable:
