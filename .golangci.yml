@@ -15,7 +15,5 @@ linters:
     - bodyclose
     - unconvert
     - nilerr
-    - nilnil
     - predeclared
     - revive
-    - tenv
