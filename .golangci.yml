@@ -14,6 +14,5 @@ linters:
     - dogsled
     - bodyclose
     - unconvert
-    - nilerr
     - predeclared
     - revive
